@@ -26,6 +26,8 @@ go build -o tftaglint cmd/tftaglint/main.go
 
 ## 使い方
 
+### 基本的な使い方
+
 ```bash
 # カレントディレクトリのTerraformファイルを検証
 tftaglint validate
@@ -39,6 +41,27 @@ tftaglint validate -c custom-rules.yaml
 # サマリーも表示
 tftaglint validate -s
 ```
+
+### Terraform Plan を使った検証（推奨）
+
+`locals`や変数を使ってタグを管理している場合は、terraform planの出力を使用することで、実際に適用される値で検証できます。
+
+```bash
+# terraform planをJSON形式で出力
+terraform plan -out=tfplan
+terraform show -json tfplan > tfplan.json
+
+# planファイルを使って検証
+tftaglint validate --plan tfplan.json
+
+# または短縮形
+tftaglint validate -p tfplan.json -s
+```
+
+この方法の利点：
+- 変数展開後の実際の値で検証
+- モジュール内のリソースも検証対象
+- `locals`で定義されたタグも正しく認識
 
 ## 設定ファイル
 
