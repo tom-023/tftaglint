@@ -20,6 +20,15 @@ type Resource struct {
 	File     string
 }
 
+// PlanResource is used for resources parsed from terraform plan
+type PlanResource struct {
+	Type     string
+	Name     string
+	Tags     map[string]string
+	File     string
+	Address  string
+}
+
 type ParseResult struct {
 	Resources []Resource
 	Errors    []error

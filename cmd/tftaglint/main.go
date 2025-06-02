@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	configFile string
+	configFile  string
 	showSummary bool
+	planFile    string
 )
 
 var rootCmd = &cobra.Command{
@@ -33,6 +34,7 @@ var validateCmd = &cobra.Command{
 func init() {
 	validateCmd.Flags().StringVarP(&configFile, "config", "c", "tag-rules.yaml", "Path to the configuration file")
 	validateCmd.Flags().BoolVarP(&showSummary, "summary", "s", false, "Show summary of violations")
+	validateCmd.Flags().StringVarP(&planFile, "plan", "p", "", "Path to terraform plan JSON file (use instead of .tf files)")
 	rootCmd.AddCommand(validateCmd)
 }
 
@@ -44,22 +46,33 @@ func main() {
 }
 
 func runValidate(cmd *cobra.Command, args []string) error {
-	// Default to current directory if no paths specified
-	paths := args
-	if len(paths) == 0 {
-		paths = []string{"."}
-	}
-
 	// Load configuration
 	cfg, err := config.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	// Parse Terraform files
-	parseResult, err := parser.ParseTerraformFiles(paths)
-	if err != nil {
-		return fmt.Errorf("failed to parse Terraform files: %w", err)
+	var parseResult *parser.ParseResult
+
+	// Check if plan file is provided
+	if planFile != "" {
+		// Parse terraform plan JSON
+		parseResult, err = parser.ParseTerraformPlan(planFile)
+		if err != nil {
+			return fmt.Errorf("failed to parse terraform plan: %w", err)
+		}
+	} else {
+		// Default to current directory if no paths specified
+		paths := args
+		if len(paths) == 0 {
+			paths = []string{"."}
+		}
+
+		// Parse Terraform files
+		parseResult, err = parser.ParseTerraformFiles(paths)
+		if err != nil {
+			return fmt.Errorf("failed to parse Terraform files: %w", err)
+		}
 	}
 
 	// Report parsing errors if any
