@@ -1,0 +1,69 @@
+# tftaglint タグルール設定ファイル
+# このファイルでは、Terraformリソースのタグの組み合わせルールを定義します
+
+rules:
+  # ルール1: Environmentタグが必須
+  - name: "environment-required"
+    description: "すべてのリソースにはEnvironmentタグが必要です"
+    required_tags:
+      - Environment
+
+  # ルール2: 本番環境では特定のタグが必須
+  - name: "production-tags"
+    description: "本番環境のリソースには追加のタグが必要です"
+    condition:
+      tag: Environment
+      value: production
+    required_tags:
+      - Owner
+      - CostCenter
+      - BackupRequired
+
+  # ルール3: 特定のタグの組み合わせを禁止
+  - name: "no-test-in-production"
+    description: "本番環境でTestタグは使用できません"
+    condition:
+      tag: Environment
+      value: production
+    forbidden_tags:
+      - Test
+      - Temporary
+
+  # ルール4: タグの値の検証
+  - name: "valid-environment-values"
+    description: "Environmentタグの値は定義された値のみ許可"
+    tag_constraints:
+      - tag: Environment
+        allowed_values:
+          - development
+          - staging
+          - production
+
+  # ルール5: 特定のリソースタイプに対するルール
+  - name: "ec2-instance-tags"
+    description: "EC2インスタンスには追加のタグが必要"
+    resource_types:
+      - aws_instance
+    required_tags:
+      - Name
+      - Environment
+      - ManagedBy
+
+  # ルール6: タグの命名規則
+  - name: "tag-naming-convention"
+    description: "タグ名は特定の命名規則に従う必要があります"
+    tag_patterns:
+      - pattern: "^[A-Z][a-zA-Z0-9]*$"
+        message: "タグ名はPascalCaseである必要があります"
+
+# グローバル設定
+global:
+  # すべてのリソースに適用される必須タグ
+  always_required_tags:
+    - Project
+    - ManagedBy
+  
+  # 無視するリソースタイプ
+  ignore_resource_types:
+    - data.aws_ami
+    - data.aws_availability_zones
