@@ -18,7 +18,7 @@
 go.work
 
 # Binary
-tftaglint
+/tftaglint
 
 # IDE specific files
 .idea/
