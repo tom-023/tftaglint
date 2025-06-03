@@ -1,0 +1,17 @@
+# CODEOWNERS for tftaglint
+# This file defines who is responsible for code in this repository.
+
+# Global owners - these users will be requested for review when someone opens a pull request
+* @tom-023
+
+# Go source files
+*.go @tom-023
+
+# Configuration and documentation
+*.yaml @tom-023
+*.yml @tom-023
+*.md @tom-023
+
+# Build and CI/CD files
+go.mod @tom-023
+go.sum @tom-023
