@@ -38,7 +38,7 @@ tftaglint validate ./terraform/
 # カスタム設定ファイルを使用
 tftaglint validate -c custom-rules.yaml
 
-# -f オプションでもカスタム設定ファイルを指定可能
+# -f オプションでもカスタム設定ファイルを指定可能（-c のエイリアス）
 tftaglint validate -f my-tag-rules.yaml
 
 # サマリーも表示
