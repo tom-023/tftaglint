@@ -33,6 +33,7 @@ var validateCmd = &cobra.Command{
 
 func init() {
 	validateCmd.Flags().StringVarP(&configFile, "config", "c", "tag-rules.yaml", "Path to the configuration file")
+	validateCmd.Flags().StringVarP(&configFile, "file", "f", "tag-rules.yaml", "Path to the configuration file (alias for --config)")
 	validateCmd.Flags().BoolVarP(&showSummary, "summary", "s", false, "Show summary of violations")
 	validateCmd.Flags().StringVarP(&planFile, "plan", "p", "", "Path to terraform plan JSON file (use instead of .tf files)")
 	rootCmd.AddCommand(validateCmd)
