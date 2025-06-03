@@ -1,22 +1,22 @@
 # tftaglint
 
-tftaglint は Terraform リソースのタグを検証するためのツールです。設定ファイルで定義されたルールに基づいて、タグの組み合わせや値を検証し、違反があればファイル名と行番号と共に報告します。
+tftaglint is a tool for validating Terraform resource tags. It validates tag combinations and values based on rules defined in a configuration file, and reports violations along with file names and line numbers.
 
-## 特徴
+## Features
 
-- 🏷️ Terraformリソースのタグを包括的に検証
-- 📝 YAMLベースの柔軟なルール設定
-- 📍 違反箇所の正確な位置情報（ファイル名・行番号）を出力
-- 🎯 リソースタイプ別のルール設定が可能
-- ⚡ 高速な解析処理
+- 🏷️ Comprehensive validation of Terraform resource tags
+- 📝 Flexible YAML-based rule configuration
+- 📍 Precise location reporting with file names and line numbers
+- 🎯 Resource type-specific rule configuration
+- ⚡ Fast parsing and validation
 
-## インストール
+## Installation
 
 ```bash
 go install github.com/tom-023/tftaglint/cmd/tftaglint@latest
 ```
 
-または、ソースからビルド：
+Or build from source:
 
 ```bash
 git clone https://github.com/tom-023/tftaglint.git
@@ -24,65 +24,65 @@ cd tftaglint
 go build -o tftaglint cmd/tftaglint/main.go
 ```
 
-## 使い方
+## Usage
 
-### 基本的な使い方
+### Basic Usage
 
 ```bash
-# カレントディレクトリのTerraformファイルを検証
+# Validate Terraform files in current directory
 tftaglint validate
 
-# 特定のディレクトリを検証
+# Validate specific directory
 tftaglint validate ./terraform/
 
-# カスタム設定ファイルを使用
+# Use custom configuration file
 tftaglint validate -c custom-rules.yaml
 
-# -f オプションでもカスタム設定ファイルを指定可能（-c のエイリアス）
+# Use -f option as an alias for -c
 tftaglint validate -f my-tag-rules.yaml
 
-# サマリーも表示
+# Show summary
 tftaglint validate -s
 ```
 
-### Terraform Plan を使った検証（推奨）
+### Validation using Terraform Plan (Recommended)
 
-`locals`や変数を使ってタグを管理している場合は、terraform planの出力を使用することで、実際に適用される値で検証できます。
+When managing tags with `locals` or variables, you can validate with actual resolved values by using terraform plan output.
 
 ```bash
-# terraform planをJSON形式で出力
+# Output terraform plan in JSON format
 terraform plan -out=tfplan
 terraform show -json tfplan > tfplan.json
 
-# planファイルを使って検証
+# Validate using plan file
 tftaglint validate --plan tfplan.json
 
-# または短縮形
+# Or use short form
 tftaglint validate -p tfplan.json -s
 ```
 
-この方法の利点：
-- 変数展開後の実際の値で検証
-- モジュール内のリソースも検証対象
-- `locals`で定義されたタグも正しく認識
+Benefits of this approach:
+- Validates with actual values after variable expansion
+- Includes resources within modules
+- Correctly recognizes tags defined in `locals`
 
-## 設定ファイル
+## Configuration File
 
-tftaglintは `tag-rules.yaml` という設定ファイルでルールを定義します。
+tftaglint defines rules in a configuration file called `tag-rules.yaml`.
 
-### 設定例
+### Configuration Example
 
 ```yaml
 rules:
-  # 必須タグの定義
+  # Define required tags
   - name: "environment-required"
-    description: "すべてのリソースにはEnvironmentタグが必要です"
+    description: "All resources must have an Environment tag"
     required_tags:
       - Environment
 
-  # 条件付きルール
+  # Conditional rules
   - name: "production-tags"
-    description: "本番環境のリソースには追加のタグが必要です"
+    description: "Production resources require additional tags"
     condition:
       tag: Environment
       value: production
@@ -91,9 +91,9 @@ rules:
       - CostCenter
       - BackupRequired
 
-  # 禁止タグの定義
+  # Define forbidden tags
   - name: "no-test-in-production"
-    description: "本番環境でTestタグは使用できません"
+    description: "Test tag cannot be used in production environment"
     condition:
       tag: Environment
       value: production
@@ -101,9 +101,9 @@ rules:
       - Test
       - Temporary
 
-  # タグ値の検証
+  # Validate tag values
   - name: "valid-environment-values"
-    description: "Environmentタグの値は定義された値のみ許可"
+    description: "Environment tag must have predefined values"
     tag_constraints:
       - tag: Environment
         allowed_values:
@@ -111,7 +111,7 @@ rules:
           - staging
           - production
 
-# グローバル設定
+# Global settings
 global:
   always_required_tags:
     - Project
@@ -120,27 +120,27 @@ global:
     - data.aws_ami
 ```
 
-## ルールの種類
+## Rule Types
 
-### 1. 必須タグ (`required_tags`)
-指定されたタグが存在することを要求します。
+### 1. Required Tags (`required_tags`)
+Requires specified tags to be present.
 
-### 2. 禁止タグ (`forbidden_tags`)
-指定されたタグが存在しないことを要求します。
+### 2. Forbidden Tags (`forbidden_tags`)
+Requires specified tags to be absent.
 
-### 3. 条件付きルール (`condition`)
-特定のタグと値の組み合わせが存在する場合にのみ、ルールを適用します。
+### 3. Conditional Rules (`condition`)
+Applies rules only when specific tag-value combinations exist.
 
-### 4. タグ制約 (`tag_constraints`)
-タグの値が許可されたリストに含まれることを検証します。
+### 4. Tag Constraints (`tag_constraints`)
+Validates that tag values are within allowed lists.
 
-### 5. タグパターン (`tag_patterns`)
-タグ名が正規表現パターンに一致することを検証します。
+### 5. Tag Patterns (`tag_patterns`)
+Validates that tag names match regular expression patterns.
 
-### 6. リソースタイプ別ルール (`resource_types`)
-特定のリソースタイプにのみルールを適用します。
+### 6. Resource Type-specific Rules (`resource_types`)
+Applies rules only to specific resource types.
 
-## 出力例
+## Output Example
 
 ```
 ❌ Found 4 tag violation(s):
@@ -149,7 +149,7 @@ global:
   Line 15: aws_instance.db
     Rule: no-test-in-production
     Message: Forbidden tag found: Test
-    Description: 本番環境でTestタグは使用できません
+    Description: Test tag cannot be used in production environment
 
   Line 15: aws_instance.db
     Rule: global-required-tags
@@ -164,9 +164,9 @@ global:
   Line 37: aws_instance.test
     Rule: valid-environment-values
     Message: Invalid value for tag Environment: 'invalid-env'. Allowed values: development, staging, production
-    Description: Environmentタグの値は定義された値のみ許可
+    Description: Environment tag must have predefined values
 ```
 
-## ライセンス
+## License
 
 MIT License
