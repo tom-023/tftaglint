@@ -37,7 +37,7 @@ type TagConstraint struct {
 type TagPattern struct {
 	Pattern string `yaml:"pattern"`
 	Message string `yaml:"message"`
-	regex   *regexp.Regexp
+	Regex   *regexp.Regexp `yaml:"-"`
 }
 
 type Global struct {
@@ -65,7 +65,7 @@ func LoadConfig(filename string) (*Config, error) {
 			if err != nil {
 				return nil, fmt.Errorf("invalid regex pattern in rule %s: %w", config.Rules[i].Name, err)
 			}
-			pattern.regex = regex
+			pattern.Regex = regex
 		}
 	}
 
@@ -73,8 +73,8 @@ func LoadConfig(filename string) (*Config, error) {
 }
 
 func (tp *TagPattern) Validate(tagName string) bool {
-	if tp.regex == nil {
+	if tp.Regex == nil {
 		return true
 	}
-	return tp.regex.MatchString(tagName)
+	return tp.Regex.MatchString(tagName)
 }

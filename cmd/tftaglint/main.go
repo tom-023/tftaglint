@@ -104,7 +104,8 @@ func runValidate(cmd *cobra.Command, args []string) error {
 
 	// Exit with non-zero status if violations found
 	if len(violations) > 0 {
-		os.Exit(1)
+		// Return error to allow cobra to handle exit
+		return fmt.Errorf("found %d tag violations", len(violations))
 	}
 
 	return nil
